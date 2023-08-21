@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 
 // Socket.io real-time communication
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  console.log(`Username: ${socket.handshake.query.username}`);
 
   socket.on("disconnect", () => {
     console.log("A user disconnected");
