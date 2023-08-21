@@ -30,6 +30,14 @@ io.on("connection", (socket) => {
   const username = socket.handshake.query.username;
   socket.on("message", (data) => {
     console.log(data);
+    const message = {
+      message: data.message,
+      // sender:data.sender,
+      sentAt: Date.now(),
+    };
+
+    messages.push(message);
+    io.emit("message", message);
   });
 
   socket.on("disconnect", () => {
