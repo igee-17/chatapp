@@ -6,6 +6,7 @@ const server = http.createServer(app);
 // const io = socketIo(server);
 const { Server } = require("socket.io");
 const io = new Server(server);
+const messages = [];
 
 // app.use(express.json());
 
@@ -25,7 +26,11 @@ app.get("/", (req, res) => {
 
 // Socket.io real-time communication
 io.on("connection", (socket) => {
-  console.log(`Username: ${socket.handshake.query.username}`);
+  // console.log(`Username: ${socket.handshake.query.username}`);
+  const username = socket.handshake.query.username;
+  socket.on("message", (data) => {
+    console.log(data);
+  });
 
   socket.on("disconnect", () => {
     console.log("A user disconnected");
