@@ -5,8 +5,9 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const mysql = require("mysql2");
+const cors = require("cors");
 // const mysql = require("mysql");
-
+app.use(cors());
 // Create a MySQL connection
 // const connection = mysql.createConnection({
 //   host: "127.0.0.1", // IP address of the server
