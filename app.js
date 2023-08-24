@@ -2,42 +2,57 @@ const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
-// const socketIo = require("socket.io");
-// const io = socketIo(server);
 const { Server } = require("socket.io");
 const io = new Server(server);
-const messages = [];
+const mysql = require("mysql2");
+// const mysql = require("mysql");
 
-// app.use(express.json());
+// Create a MySQL connection
+const connection = mysql.createConnection({
+  host: "127.0.0.1", // IP address of the server
+  port: 3306, // SSH port
+  user: "root", // Database user
+  password: "olaligbags", // Database password
+  database: "fatherland", // Database name
+});
 
-// Express API routes for the frontend to interact with the chat system
-// app.post("/send-message", (req, res) => {
-//   console.log(req.body, "body");
-//   const message = req.body.message;
-
-//   io.emit("chat message", message);
-//   res.status(200).json({ success: true });
-// });
+// Establish the connection
+connection.connect((error) => {
+  if (error) {
+    console.error("Error connecting to database:", error);
+  } else {
+    console.log("Connected to database");
+  }
+});
 
 app.get("/", (req, res) => {
-  // console.log("request made");
   res.send("connection made!!");
 });
 
-// Socket.io real-time communication
 io.on("connection", (socket) => {
-  // console.log(`Username: ${socket.handshake.query.username}`);
   const username = socket.handshake.query.username;
+
   socket.on("message", (data) => {
     console.log(data);
     const message = {
       message: data.message,
-      // sender:data.sender,
-      sentAt: Date.now(),
+      sentAt: new Date().toISOString(),
+      userId: data.id,
     };
 
-    messages.push(message);
-    io.emit("message", message);
+    // Insert the message into the MySQL database
+    connection.query(
+      "INSERT INTO messages (message, sent_at) VALUES (?, ?)",
+      [message.message, message.sentAt, message.userId],
+      (error, results) => {
+        if (error) {
+          console.error("Error inserting message into MySQL:", error);
+        } else {
+          console.log("Message inserted into MySQL:", results);
+          io.emit("message", message);
+        }
+      }
+    );
   });
 
   socket.on("disconnect", () => {
