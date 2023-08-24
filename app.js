@@ -8,12 +8,19 @@ const mysql = require("mysql2");
 // const mysql = require("mysql");
 
 // Create a MySQL connection
+// const connection = mysql.createConnection({
+//   host: "127.0.0.1", // IP address of the server
+//   port: 3306, // SSH port
+//   user: "root", // Database user
+//   password: "olaligbags", // Database password
+//   database: "fatherland", // Database name
+// });
 const connection = mysql.createConnection({
-  host: "127.0.0.1", // IP address of the server
-  port: 3306, // SSH port
-  user: "root", // Database user
-  password: "olaligbags", // Database password
-  database: "fatherland", // Database name
+  host: "sql6.freemysqlhosting.net", // IP address of the server
+  // port: 3306, // SSH port
+  user: "sql6640697", // Database user
+  password: "bEYr4jHU8C", // Database password
+  database: "sql6640697", // Database name
 });
 
 // Establish the connection
