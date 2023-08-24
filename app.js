@@ -40,19 +40,38 @@ io.on("connection", (socket) => {
       userId: data.id,
     };
 
-    // Insert the message into the MySQL database
-    connection.query(
-      "INSERT INTO messages (message, sent_at) VALUES (?, ?)",
-      [message.message, message.sentAt, message.userId],
-      (error, results) => {
-        if (error) {
-          console.error("Error inserting message into MySQL:", error);
-        } else {
-          console.log("Message inserted into MySQL:", results);
-          io.emit("message", message);
-        }
+    executeQuery();
+
+    function executeQuery() {
+      if (connection.state === "disconnected") {
+        connection.connect((error) => {
+          if (error) {
+            console.error("Error reconnecting to database:", error);
+          } else {
+            console.log("Reconnected to database");
+            performQuery();
+          }
+        });
+      } else {
+        performQuery();
       }
-    );
+    }
+
+    // Insert the message into the MySQL database
+    function performQuery() {
+      connection.query(
+        "INSERT INTO messages (message, sent_at, user_id) VALUES (?, ?, ?)",
+        [message.message, message.sentAt, message.userId],
+        (error, results) => {
+          if (error) {
+            console.error("Error inserting message into MySQL:", error);
+          } else {
+            console.log("Message inserted into MySQL:", results);
+            io.emit("message", message);
+          }
+        }
+      );
+    }
   });
 
   socket.on("disconnect", () => {
