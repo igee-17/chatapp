@@ -3,11 +3,17 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5174", // Replace with your frontend's URL
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 const mysql = require("mysql2");
 const cors = require("cors");
 // const mysql = require("mysql");
-app.use(cors());
+// app.use(cors());
 // Create a MySQL connection
 // const connection = mysql.createConnection({
 //   host: "127.0.0.1", // IP address of the server
