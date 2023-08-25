@@ -35,6 +35,17 @@ app.get("/", (req, res) => {
   res.send("connection made!!");
 });
 
+app.get("/messages", (req, res) => {
+  connection.query("SELECT * FROM messages", (error, results) => {
+    if (error) {
+      console.error("Error retrieving messages from MySQL:", error);
+      res.status(500).json({ error: "Failed to retrieve messages" });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
 io.on("connection", (socket) => {
   const username = socket.handshake.query.username;
   console.log("a user connected");
@@ -46,6 +57,7 @@ io.on("connection", (socket) => {
       message: data.message,
       sentAt: new Date().toISOString(),
       userId: data.id,
+      family_id: data.familyId
       // userId: 1,
     };
 
@@ -73,9 +85,9 @@ io.on("connection", (socket) => {
       // const userId = parseInt(message.userId, 10)
 
       connection.query(
-        "INSERT INTO messages (message, sent_at, user_id) VALUES (?, ?, ?)",
+        "INSERT INTO messages (message, sent_at, user_id, family_id) VALUES (?, ?, ?, ?)",
         // [message.message, message.sentAt, message.userId],
-        [message.message, formattedTimestamp, message.userId],
+        [message.message, formattedTimestamp, message.userId,message.family_id],
         (error, results) => {
           if (error) {
             console.error("Error inserting message into MySQL:", error);
