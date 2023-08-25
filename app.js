@@ -55,6 +55,7 @@ io.on("connection", (socket) => {
       message: data.message,
       sentAt: new Date().toISOString(),
       userId: data.id,
+      // userId: 1,
     };
 
     executeQuery();
@@ -76,9 +77,14 @@ io.on("connection", (socket) => {
 
     // Insert the message into the MySQL database
     function performQuery() {
+      const formattedTimestamp = new Date(message.sentAt).toISOString().slice(0, 19).replace('T', ' ');
+
+      // const userId = parseInt(message.userId, 10)
+
       connection.query(
         "INSERT INTO messages (message, sent_at, user_id) VALUES (?, ?, ?)",
-        [message.message, message.sentAt, message.userId],
+        // [message.message, message.sentAt, message.userId],
+        [message.message, formattedTimestamp, message.userId],
         (error, results) => {
           if (error) {
             console.error("Error inserting message into MySQL:", error);
