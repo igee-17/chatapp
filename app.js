@@ -5,7 +5,8 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5174", // Replace with your frontend's URL
+    // origin: "http://localhost:5174", // Replace with your frontend's URL
+    origin: "0.0.0.0", // Replace with your frontend's URL
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -23,11 +24,11 @@ const cors = require("cors");
 //   database: "fatherland", // Database name
 // });
 const connection = mysql.createConnection({
-  host: "sql6.freemysqlhosting.net", // IP address of the server
-  // port: 3306, // SSH port
-  user: "sql6640697", // Database user
-  password: "bEYr4jHU8C", // Database password
-  database: "sql6640697", // Database name
+  host: "157.90.167.161", // IP address of the server
+  port: 3306, // SSH port
+  user: "hackerdev", // Database user
+  password: "F@ther35l@nd", // Database password
+  database: "fatherland", // Database name
 });
 
 // Establish the connection
@@ -45,6 +46,8 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   const username = socket.handshake.query.username;
+  console.log("a user connected");
+  let userConnected = true;
 
   socket.on("message", (data) => {
     console.log(data);
@@ -86,10 +89,16 @@ io.on("connection", (socket) => {
         }
       );
     }
+
+    // if (userConnected) {
+    //   executeQuery();
+    // }
   });
 
   socket.on("disconnect", () => {
     console.log("A user disconnected");
+    userConnected = false;
+    connection.end();
   });
 });
 
