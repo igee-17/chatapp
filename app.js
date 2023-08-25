@@ -13,16 +13,7 @@ const io = new Server(server, {
 });
 const mysql = require("mysql2");
 const cors = require("cors");
-// const mysql = require("mysql");
-// app.use(cors());
-// Create a MySQL connection
-// const connection = mysql.createConnection({
-//   host: "127.0.0.1", // IP address of the server
-//   port: 3306, // SSH port
-//   user: "root", // Database user
-//   password: "olaligbags", // Database password
-//   database: "fatherland", // Database name
-// });
+
 const connection = mysql.createConnection({
   host: "157.90.167.161", // IP address of the server
   port: 3306, // SSH port
@@ -104,7 +95,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("A user disconnected");
     userConnected = false;
-    connection.end();
+    // connection.end();
   });
 });
 
