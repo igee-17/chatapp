@@ -14,6 +14,16 @@ const io = new Server(server, {
 const mysql = require("mysql2");
 const cors = require("cors");
 
+//Setting up cors
+const corsOption = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  exposedHeaders: ["x-auth-token"],
+};
+
+app.use(cors(corsOption));
+
 const connection = mysql.createConnection({
   host: "157.90.167.161", // IP address of the server
   port: 3306, // SSH port
