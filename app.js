@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
       connection.query(
         "INSERT INTO messages (message, sent_at, user_id, family_id) VALUES (?, ?, ?, ?)",
         // [message.message, message.sentAt, message.userId],
-        [message.message, formattedTimestamp, message.userId,message.family_id],
+        [message.message, formattedTimestamp, message.userId, message.family_id],
         (error, results) => {
           if (error) {
             console.error("Error inserting message into MySQL:", error);
@@ -121,6 +121,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(8080, () => {
-  console.log("Server listening on port 8080");
+server.listen(8000, () => {
+  console.log("Server listening on port 8000");
 });
