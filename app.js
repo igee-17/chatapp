@@ -55,16 +55,28 @@ app.get("/", (req, res) => {
   res.send("connection made!!");
 });
 
-app.get("/messages", (req, res) => {
-  console.log('message request made');
-  connection.query("SELECT * FROM messages", (error, results) => {
-    if (error) {
-      console.error("Error retrieving messages from MySQL:", error);
-      res.status(500).json({ error: "Failed to retrieve messages" });
-    } else {
-      res.status(200).json(results);
-    }
-  });
+// app.get("/messages", (req, res) => {
+//   console.log('message request made');
+//   connection.query("SELECT * FROM messages", (error, results) => {
+//     if (error) {
+//       console.error("Error retrieving messages from MySQL:", error);
+//       res.status(500).json({ error: "Failed to retrieve messages" });
+//     } else {
+//       res.status(200).json(results);
+//     }
+//   });
+// });
+
+app.get("/messages", async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [results, fields] = await connection.query("SELECT * FROM messages");
+    connection.release();
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Error retrieving messages from MySQL:", error);
+    res.status(500).json({ error: "Failed to retrieve messages" });
+  }
 });
 
 io.on("connection", (socket) => {
