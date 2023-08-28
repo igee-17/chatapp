@@ -87,15 +87,18 @@ io.on("connection", async (socket) => {
   const username = socket.handshake.query.username;
   console.log("a user connected");
 
+  const familyId = socket.handshake.query.familyId; // Get family ID from frontend
+
   try {
     const connection = await pool.getConnection();
 
-    // Retrieve old messages from MySQL
+    // Retrieve old messages based on the family ID
     const [oldMessages, oldMessagesFields] = await connection.query(
-      "SELECT * FROM messages"
+      "SELECT * FROM messages WHERE family_id = ?",
+      [familyId]
     );
 
-    console.log(oldMessages);
+    console.log(socket.handshake.query.familyId);
 
     connection.release();
 
