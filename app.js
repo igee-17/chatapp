@@ -113,7 +113,7 @@ io.on("connection", async (socket) => {
     const message = {
       message: data.message,
       sentAt: new Date().toISOString(),
-      userId: data.id,
+      user_id: data.id,
       family_id: data.familyId,
     };
 
