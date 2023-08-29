@@ -2,6 +2,9 @@ const { connection, pool } = require("../db");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { fetchOldMessages } = require("./modules/groupChat");
+const fetchOldDynastyMessages = require("./modules/dynastyChat");
+const fetchOldPostMessages = require("./modules/postChat");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -18,27 +21,19 @@ const listener = async (socket) => {
     console.log("a user connected");
 
     const familyId = socket.handshake.query.familyId; // Get family ID from frontend
-    const dynasty_id = socket.handshake.query.dynasty_id; // Get family ID from frontend
+    const dynasty_id = socket.handshake.query.dynasty_id; // Get dynasty ID from frontend
+    const post_id = socket.handshake.query.post_id; // Get post ID from frontend
 
-    try {
-        const connection = await pool.getConnection();
+    console.log('dynasty id', socket.handshake.query.dynasty_id);
+    console.log('family id', socket.handshake.query.familyId);
+    console.log('post id', socket.handshake.query.post_id);
 
-        // Retrieve old messages based on the family ID
-        const [oldMessages, oldMessagesFields] = await connection.query(
-            "SELECT * FROM messages WHERE family_id = ?",
-            [familyId]
-        );
-
-        console.log('dynasty id', socket.handshake.query.dynasty_id);
-        console.log('family id', socket.handshake.query.familyId);
-
-        connection.release();
-
-        // Emit old messages to the connected user
-        socket.emit("oldMessages", oldMessages);
-    } catch (error) {
-        console.error("Error retrieving old messages from MySQL:", error);
-    }
+    // ----------------------------------------------
+    // -------------- GROUP CHAT --------------------
+    // ----------------------------------------------
+    // FETCH OLD MESSAGES AND EMIT (THESE ARE THE GROUP CHAT MESSAGES)
+    const oldMessages = await fetchOldMessages(familyId)
+    socket.emit("oldMessages", oldMessages);
 
     socket.on("message", async (data) => {
         console.log(data);
@@ -73,29 +68,9 @@ const listener = async (socket) => {
         }
     });
 
+    // -------------------------------------------
     // -------------- DYNASTY --------------------
-    // Function to fetch old dynasty messages
-    const fetchOldDynastyMessages = async (dynasty_id) => {
-        try {
-            const connection = await pool.getConnection();
-
-            // Retrieve old dynasty messages based on the family ID
-            const [oldDynastyMessages, oldMessagesFields] = await connection.query(
-                "SELECT * FROM dynasty_messages WHERE dynasty_id = ?",
-                [dynasty_id]
-            );
-
-            connection.release();
-
-            // console.log(oldDynastyMessages, 'old dd');
-
-            return oldDynastyMessages;
-        } catch (error) {
-            console.error("Error retrieving old dynasty messages from MySQL:", error);
-            return [];
-        }
-    };
-
+    // -------------------------------------------
     // Fetch old dynasty messages and emit them to the user
     const oldDynastyMessages = await fetchOldDynastyMessages(dynasty_id);
     socket.emit("oldDynastyMessages", oldDynastyMessages);
@@ -131,6 +106,42 @@ const listener = async (socket) => {
         }
     });
 
+    // ------------------------------------------------------
+    // --------------------COMMENTS--------------------------
+    // ------------------------------------------------------
+    const oldPostMessages = await fetchOldPostMessages(post_id);
+    socket.emit("oldPostMessages", oldPostMessages);
+
+    socket.on("post", async (data) => {
+        const message = {
+            message: data.message,
+            sent_at: new Date().toISOString(),
+            user_id: data.id,
+            post_id: data.post_id,
+        };
+
+        try {
+            const connection = await pool.getConnection();
+            const formattedTimestamp = new Date(message.sent_at)
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ");
+
+            const [results, fields] = await connection.execute(
+                "INSERT INTO post_messages (message, sent_at, user_id, post_id) VALUES (?, ?, ?, ?)",
+                [message.message, formattedTimestamp, message.user_id, message.post_id]
+            );
+
+            connection.release(); // Release the connection back to the pool
+
+            console.log("Post Message inserted into MySQL:", results);
+
+            // Emit the current message to all connected users in the dynasty chat
+            io.emit("post", message);
+        } catch (error) {
+            console.error("Error inserting post message into MySQL:", error);
+        }
+    });
 
     socket.on("disconnect", () => {
         console.log("A user disconnected");
