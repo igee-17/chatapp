@@ -138,4 +138,4 @@ const listener = async (socket) => {
     });
 };
 
-module.exports = { app, io, server, listener }
+module.exports = { app, io, server, listener, express }

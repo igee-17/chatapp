@@ -1,17 +1,23 @@
-const express = require("express");
+const { pool } = require("../db");
+const { express } = require("../sockets/socketHandler");
+
+// const express = require("express");
 const router = express.Router();
-const db = require("../db");
 
-router.get("/", async (req, res) => {
+const getMessages = router.get("/messages", async (req, res) => {
+    console.log('route entered');
     try {
-        // Retrieve messages from the database
-        // ...
-
-        res.status(200).json(messages);
+        console.log("Acquiring connection from the pool...");
+        const connection = await pool.getConnection();
+        console.log("Connection acquired.");
+        const [results, fields] = await connection.query("SELECT * FROM messages");
+        connection.release();
+        console.log("Connection released.");
+        res.status(200).json(results);
     } catch (error) {
         console.error("Error retrieving messages from MySQL:", error);
         res.status(500).json({ error: "Failed to retrieve messages" });
     }
 });
 
-module.exports = router;
+module.exports = getMessages;
