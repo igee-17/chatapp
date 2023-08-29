@@ -29,7 +29,8 @@ const listener = async (socket) => {
             [familyId]
         );
 
-        console.log(socket.handshake.query.dynasty_id);
+        console.log('dynasty id', socket.handshake.query.dynasty_id);
+        console.log('family id', socket.handshake.query.familyId);
 
         connection.release();
 
