@@ -127,7 +127,7 @@ io.on("connection", async (socket) => {
 
       const [results, fields] = await connection.execute(
         "INSERT INTO messages (message, sent_at, user_id, family_id) VALUES (?, ?, ?, ?)",
-        [message.message, formattedTimestamp, message.userId, message.family_id]
+        [message.message, formattedTimestamp, message.user_id, message.family_id]
       );
 
       connection.release(); // Release the connection back to the pool
