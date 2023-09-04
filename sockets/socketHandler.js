@@ -143,6 +143,47 @@ const listener = async (socket) => {
         }
     });
 
+
+    // ------------------------------------------------------------
+    // --------------------PRIVATE MESSAGE--------------------------
+    // -------------------------------------------------------------
+
+    socket.on("privateMessage", async (data) => {
+        console.log('private room entered');
+        const targetUser = data.targetUser; // The recipient's username or ID
+        const roomName = `${username}-${targetUser}`; // Create a unique room name
+        socket.join(roomName);
+
+        const message = {
+            message: data.message,
+            sent_at: new Date().toISOString(),
+            user_id: data.id,
+        };
+
+        try {
+            const connection = await pool.getConnection();
+            const formattedTimestamp = new Date(message.sent_at)
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ");
+
+            // Modify your database query here to store the message in the private conversation
+            // const [results, fields] = await connection.execute(
+            //     "INSERT INTO private_messages (message, sent_at, user_id, room_name) VALUES (?, ?, ?, ?)",
+            //     [message.message, formattedTimestamp, message.user_id, roomName]
+            // );
+
+            // connection.release(); // Release the connection back to the pool
+
+            // console.log("Private Message inserted into MySQL:", results);
+
+            // Emit the current message to all connected users in the private room
+            io.to(roomName).emit("privateMessage", message);
+        } catch (error) {
+            console.error("Error inserting private message into MySQL:", error);
+        }
+    });
+
     socket.on("disconnect", () => {
         console.log("A user disconnected");
         // connection.end();
